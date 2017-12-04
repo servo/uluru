@@ -8,6 +8,8 @@ extern crate arrayvec;
 
 use arrayvec::{Array, ArrayVec};
 
+#[cfg(test)] mod tests;
+
 /// A LRU cache using a statically-sized array for storage.
 ///
 /// The most-recently-used entry is at index `head`. The entries form a linked list, linked to each
