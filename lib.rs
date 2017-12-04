@@ -20,7 +20,7 @@ use arrayvec::{Array, ArrayVec};
 /// All items are stored inline within the `LRUCache`, so it does not impose any heap allocation or
 /// indirection.  A linked list is used to record the cache order, so the items themselves do not
 /// need to be moved when the order changes.  (This is important for speed if the items are large.)
-pub struct LRUCache<T, A: Array<Item=Entry<T>>> {
+pub struct LRUCache<A: Array> {
     /// The most-recently-used entry is at index `head`. The entries form a linked list, linked to
     /// each other by indices within the `entries` array.  After an entry is added to the array,
     /// its index never changes, so these links are never invalidated.
@@ -43,7 +43,7 @@ pub struct Entry<T> {
     next: u16,
 }
 
-impl<T, A: Array<Item=Entry<T>>> Default for LRUCache<T, A> {
+impl<A: Array> Default for LRUCache<A> {
     fn default() -> Self {
         let cache = LRUCache {
             entries: ArrayVec::new(),
@@ -55,7 +55,7 @@ impl<T, A: Array<Item=Entry<T>>> Default for LRUCache<T, A> {
     }
 }
 
-impl<T, A: Array<Item=Entry<T>>> LRUCache<T, A> {
+impl<T, A: Array<Item=Entry<T>>> LRUCache<A> {
     /// Returns the number of elements in the cache.
     pub fn num_entries(&self) -> usize {
         self.entries.len()
@@ -82,7 +82,7 @@ impl<T, A: Array<Item=Entry<T>>> LRUCache<T, A> {
 
     /// Iterate over the contents of this cache, from more to less recently
     /// used.
-    pub fn iter(&self) -> LRUCacheIterator<T, A> {
+    pub fn iter(&self) -> LRUCacheIterator<A> {
         LRUCacheIterator {
             pos: self.head,
             done: self.entries.len() == 0,
@@ -91,7 +91,7 @@ impl<T, A: Array<Item=Entry<T>>> LRUCache<T, A> {
     }
 
     /// Iterate mutably over the contents of this cache.
-    pub fn iter_mut(&mut self) -> LRUCacheMutIterator<T, A> {
+    pub fn iter_mut(&mut self) -> LRUCacheMutIterator<A> {
         LRUCacheMutIterator {
             pos: self.head,
             done: self.entries.len() == 0,
@@ -192,13 +192,13 @@ impl<T, A: Array<Item=Entry<T>>> LRUCache<T, A> {
 }
 
 /// Immutable iterator over values in an LRUCache, from most-recently-used to least-recently-used.
-pub struct LRUCacheIterator<'a, T: 'a, A: 'a + Array<Item=Entry<T>>> {
-    cache: &'a LRUCache<T, A>,
+pub struct LRUCacheIterator<'a, A: 'a + Array> {
+    cache: &'a LRUCache<A>,
     pos: u16,
     done: bool,
 }
 
-impl<'a, T, A> Iterator for LRUCacheIterator<'a, T, A>
+impl<'a, T, A> Iterator for LRUCacheIterator<'a, A>
 where T: 'a,
       A: 'a + Array<Item=Entry<T>>
 {
@@ -220,13 +220,13 @@ where T: 'a,
 }
 
 /// Mutable iterator over values in an LRUCache, from most-recently-used to least-recently-used.
-pub struct LRUCacheMutIterator<'a, T: 'a, A: 'a + Array<Item=Entry<T>>> {
-    cache: &'a mut LRUCache<T, A>,
+pub struct LRUCacheMutIterator<'a, A: 'a + Array> {
+    cache: &'a mut LRUCache<A>,
     pos: u16,
     done: bool,
 }
 
-impl<'a, T, A> Iterator for LRUCacheMutIterator<'a, T, A>
+impl<'a, T, A> Iterator for LRUCacheMutIterator<'a, A>
 where T: 'a,
       A: 'a + Array<Item=Entry<T>>
 {
