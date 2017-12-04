@@ -114,6 +114,21 @@ impl<T, A: Array<Item=Entry<T>>> LRUCache<T, A> {
         }
     }
 
+    /// Returns the first item in the cache that matches the given predicate.
+    /// Touches the result on a hit.
+    pub fn find<F>(&mut self, mut pred: F) -> Option<&mut T>
+    where
+        F: FnMut(&T) -> bool
+    {
+        match self.iter_mut().find(|&(_, ref x)| pred(x)) {
+            Some((i, _)) => {
+                self.touch(i);
+                self.front_mut()
+            }
+            None => None
+        }
+    }
+
     /// Insert a given key in the cache.
     pub fn insert(&mut self, val: T) {
         let entry = Entry { val, prev: 0, next: 0 };
