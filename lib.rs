@@ -107,8 +107,6 @@ impl<T, A: Array<Item=Entry<T>>> LRUCache<T, A> {
             None => None,
             Some((i, r)) => {
                 self.touch(i);
-                let front = self.front_mut().unwrap();
-                debug_assert!(test_one(front).is_some());
                 Some(r)
             }
         }
