@@ -5,8 +5,8 @@ authors = ["The Servo Project Developers"]
 license = "MPL-2.0"
 description = "A simple, fast, LRU cache implementation"
 repository = "https://github.com/servo/uluru"
-keywords = ["cache", "linkedlist", "array"]
-categories = ["data-structures"]
+keywords = ["cache", "linkedlist", "array", "no_std"]
+categories = ["data-structures", "no-std"]
 readme = "README.md"
 
 [lib]
@@ -14,4 +14,4 @@ name = "uluru"
 path = "lib.rs"
 
 [dependencies]
-arrayvec = "0.4.6" # public dependency
+arrayvec = { version = "0.4.6", default-features = false } # public dependency
