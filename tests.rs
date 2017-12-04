@@ -3,10 +3,10 @@ extern crate std;
 use self::std::vec::Vec;
 use super::*;
 
-type TestCache = LRUCache<i32, [Entry<i32>; 4]>;
+type TestCache = LRUCache<[Entry<i32>; 4]>;
 
 /// Convenience function for test assertions
-fn items<T, A>(cache: &LRUCache<T, A>) -> Vec<T>
+fn items<T, A>(cache: &LRUCache<A>) -> Vec<T>
 where
     T: Clone,
     A: Array<Item=Entry<T>>
