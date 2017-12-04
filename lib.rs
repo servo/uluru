@@ -131,7 +131,7 @@ impl<T, A: Array<Item=Entry<T>>> LRUCache<T, A> {
         self.push_front(new_head);
     }
 
-    /// Remove an from the linked list.
+    /// Remove an entry from the linked list.
     ///
     /// Note: This only unlinks the entry from the list; it does not remove it from the array.
     fn remove(&mut self, i: u16) {
