@@ -4,7 +4,7 @@
 
 #![no_std]
 
-//! A simple LRU cache.
+//! A simple least-recently-used (LRU) cache.
 
 extern crate arrayvec;
 
@@ -12,10 +12,16 @@ use arrayvec::{Array, ArrayVec};
 
 /// A LRU cache using a statically-sized array for storage.
 ///
-/// The most-recently-used entry is at index `head`. The entries form a linked list, linked to each
-/// other by indices within the `entries` array.  After an entry is added to the array, its index
-/// never changes, so these links are never invalidated.
+/// `LRUCache` uses a fixed-capacity array for storage. It provides `O(1)` insertion, and `O(n)`
+/// lookup.
+///
+/// All items are stored inline within the `LRUCache`, so it does not impose any heap allocation or
+/// indirection.  A linked list is used to record the cache order, so the items themselves do not
+/// need to be moved when the order changes.  (This is important for speed if the items are large.)
 pub struct LRUCache<T, A: Array<Item=Entry<T>>> {
+    /// The most-recently-used entry is at index `head`. The entries form a linked list, linked to
+    /// each other by indices within the `entries` array.  After an entry is added to the array,
+    /// its index never changes, so these links are never invalidated.
     entries: ArrayVec<A>,
     /// Index of the first entry. If the cache is empty, ignore this field.
     head: u16,
@@ -132,6 +138,9 @@ impl<T, A: Array<Item=Entry<T>>> LRUCache<T, A> {
     }
 
     /// Insert a given key in the cache.
+    ///
+    /// This item becomes the front (most-recently-used) item in the cache.  If the cache is full,
+    /// the back (least-recently-used) item will be removed.
     pub fn insert(&mut self, val: T) {
         let entry = Entry { val, prev: 0, next: 0 };
 
