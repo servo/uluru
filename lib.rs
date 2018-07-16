@@ -68,6 +68,7 @@ pub struct LRUCache<A: Array> {
 }
 
 /// An opaque token used as an index into an LRUCache.
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct CacheIndex(u16);
 
 /// An entry in an LRUCache.
