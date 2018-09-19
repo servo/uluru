@@ -69,7 +69,7 @@ pub struct LRUCache<A: Array> {
 
 /// An opaque token used as an index into an LRUCache.
 #[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub struct CacheIndex(u16);
+struct CacheIndex(u16);
 
 /// An entry in an LRUCache.
 pub struct Entry<T> {
@@ -100,7 +100,7 @@ impl<T, A: Array<Item=Entry<T>>> LRUCache<A> {
 
     #[inline]
     /// Touch a given entry, putting it first in the list.
-    pub fn touch(&mut self, idx: CacheIndex) {
+    fn touch(&mut self, idx: CacheIndex) {
         if idx.0 != self.head {
             self.remove(idx.0);
             self.push_front(idx.0);
@@ -117,18 +117,8 @@ impl<T, A: Array<Item=Entry<T>>> LRUCache<A> {
         self.entries.get_mut(self.head as usize).map(|e| &mut e.val)
     }
 
-    /// Iterate over the contents of this cache, from more to less recently
-    /// used.
-    pub fn iter(&self) -> LRUCacheIterator<A> {
-        LRUCacheIterator {
-            pos: self.head,
-            done: self.entries.len() == 0,
-            cache: self,
-        }
-    }
-
     /// Iterate mutably over the contents of this cache.
-    pub fn iter_mut(&mut self) -> LRUCacheMutIterator<A> {
+    fn iter_mut(&mut self) -> LRUCacheMutIterator<A> {
         LRUCacheMutIterator {
             pos: self.head,
             done: self.entries.len() == 0,
@@ -241,36 +231,8 @@ impl<T, A: Array<Item=Entry<T>>> LRUCache<A> {
     }
 }
 
-/// Immutable iterator over values in an LRUCache, from most-recently-used to least-recently-used.
-pub struct LRUCacheIterator<'a, A: 'a + Array> {
-    cache: &'a LRUCache<A>,
-    pos: u16,
-    done: bool,
-}
-
-impl<'a, T, A> Iterator for LRUCacheIterator<'a, A>
-where T: 'a,
-      A: 'a + Array<Item=Entry<T>>
-{
-    type Item = (CacheIndex, &'a T);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.done { return None }
-
-        let entry = &self.cache.entries[self.pos as usize];
-
-        let index = CacheIndex(self.pos);
-        if self.pos == self.cache.tail {
-            self.done = true;
-        }
-        self.pos = entry.next;
-
-        Some((index, &entry.val))
-    }
-}
-
 /// Mutable iterator over values in an LRUCache, from most-recently-used to least-recently-used.
-pub struct LRUCacheMutIterator<'a, A: 'a + Array> {
+struct LRUCacheMutIterator<'a, A: 'a + Array> {
     cache: &'a mut LRUCache<A>,
     pos: u16,
     done: bool,
