@@ -67,10 +67,6 @@ pub struct LRUCache<A: Array> {
     tail: u16,
 }
 
-/// An opaque token used as an index into an LRUCache.
-#[derive(Copy, Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-struct CacheIndex(u16);
-
 /// An entry in an LRUCache.
 pub struct Entry<T> {
     val: T,
@@ -100,10 +96,10 @@ impl<T, A: Array<Item=Entry<T>>> LRUCache<A> {
 
     #[inline]
     /// Touch a given entry, putting it first in the list.
-    fn touch(&mut self, idx: CacheIndex) {
-        if idx.0 != self.head {
-            self.remove(idx.0);
-            self.push_front(idx.0);
+    fn touch(&mut self, idx: u16) {
+        if idx != self.head {
+            self.remove(idx);
+            self.push_front(idx);
         }
     }
 
@@ -242,7 +238,7 @@ impl<'a, T, A> Iterator for LRUCacheMutIterator<'a, A>
 where T: 'a,
       A: 'a + Array<Item=Entry<T>>
 {
-    type Item = (CacheIndex, &'a mut T);
+    type Item = (u16, &'a mut T);
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.done { return None }
@@ -252,7 +248,7 @@ where T: 'a,
             &mut *(&mut self.cache.entries[self.pos as usize] as *mut Entry<T>)
         };
 
-        let index = CacheIndex(self.pos);
+        let index = self.pos;
         if self.pos == self.cache.tail {
             self.done = true;
         }
