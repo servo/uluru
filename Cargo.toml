@@ -1,6 +1,6 @@
 [package]
 name = "uluru"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["The Servo Project Developers"]
 license = "MPL-2.0"
 description = "A simple, fast, LRU cache implementation"
