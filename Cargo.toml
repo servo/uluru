@@ -1,6 +1,6 @@
 [package]
 name = "uluru"
-version = "0.3.0"
+version = "0.4.0"
 authors = ["The Servo Project Developers"]
 license = "MPL-2.0"
 description = "A simple, fast, LRU cache implementation"
@@ -14,4 +14,4 @@ name = "uluru"
 path = "lib.rs"
 
 [dependencies]
-arrayvec = { version = "0.4.6", default-features = false } # public dependency
+arrayvec = { version = "0.5", default-features = false } # public dependency
