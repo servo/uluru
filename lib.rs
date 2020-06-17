@@ -15,6 +15,8 @@ extern crate arrayvec;
 
 use arrayvec::{Array, ArrayVec};
 
+use core::fmt;
+
 #[cfg(test)]
 mod tests;
 
@@ -69,6 +71,7 @@ pub struct LRUCache<A: Array> {
 }
 
 /// An entry in an LRUCache.
+#[derive(Debug, Clone)]
 pub struct Entry<T> {
     val: T,
     /// Index of the previous entry. If this entry is the head, ignore this field.
@@ -92,19 +95,13 @@ impl<A: Array> Default for LRUCache<A> {
     }
 }
 
-impl<T, A: Array<Item = Entry<T>>> LRUCache<A> {
+impl<T, A> LRUCache<A>
+where
+    A: Array<Item = Entry<T>>,
+{
     /// Returns the number of elements in the cache.
     pub fn num_entries(&self) -> usize {
         self.entries.len()
-    }
-
-    #[inline]
-    /// Touch a given entry, putting it first in the list.
-    fn touch(&mut self, idx: u16) {
-        if idx != self.head {
-            self.remove(idx);
-            self.push_front(idx);
-        }
     }
 
     /// Returns the front entry in the list (most recently used).
@@ -115,15 +112,6 @@ impl<T, A: Array<Item = Entry<T>>> LRUCache<A> {
     /// Returns a mutable reference to the front entry in the list (most recently used).
     pub fn front_mut(&mut self) -> Option<&mut T> {
         self.entries.get_mut(self.head as usize).map(|e| &mut e.val)
-    }
-
-    /// Iterate mutably over the contents of this cache.
-    fn iter_mut(&mut self) -> LRUCacheMutIterator<A> {
-        LRUCacheMutIterator {
-            pos: self.head,
-            done: self.entries.len() == 0,
-            cache: self,
-        }
     }
 
     /// Performs a lookup on the cache with the given test routine. Touches
@@ -143,24 +131,37 @@ impl<T, A: Array<Item = Entry<T>>> LRUCache<A> {
         match result {
             None => None,
             Some((i, r)) => {
-                self.touch(i);
+                self.touch_index(i);
                 Some(r)
             }
         }
     }
 
-    /// Returns the first item in the cache that matches the given predicate.
-    /// Touches the result on a hit.
-    pub fn find<F>(&mut self, mut pred: F) -> Option<&mut T>
+    /// Touches the first item in the cache that matches the given predicate.
+    /// Returns `true` on a hit, `false` if no matches.
+    pub fn touch<F>(&mut self, mut pred: F) -> bool
     where
         F: FnMut(&T) -> bool,
     {
         match self.iter_mut().find(|&(_, ref x)| pred(x)) {
             Some((i, _)) => {
-                self.touch(i);
-                self.front_mut()
+                self.touch_index(i);
+                true
             }
-            None => None,
+            None => false,
+        }
+    }
+
+    /// Returns the first item in the cache that matches the given predicate.
+    /// Touches the result on a hit.
+    pub fn find<F>(&mut self, pred: F) -> Option<&mut T>
+    where
+        F: FnMut(&T) -> bool,
+    {
+        if self.touch(pred) {
+            self.front_mut()
+        } else {
+            None
         }
     }
 
@@ -186,6 +187,29 @@ impl<T, A: Array<Item = Entry<T>>> LRUCache<A> {
         };
 
         self.push_front(new_head);
+    }
+
+    /// Evict all elements from the cache.
+    pub fn evict_all(&mut self) {
+        self.entries.clear();
+    }
+
+    /// Iterate mutably over the contents of this cache.
+    fn iter_mut(&mut self) -> IterMut<A> {
+        IterMut {
+            pos: self.head,
+            done: self.entries.len() == 0,
+            cache: self,
+        }
+    }
+
+    /// Touch a given entry, putting it first in the list.
+    #[inline]
+    fn touch_index(&mut self, idx: u16) {
+        if idx != self.head {
+            self.remove(idx);
+            self.push_front(idx);
+        }
     }
 
     /// Remove an entry from the linked list.
@@ -228,21 +252,44 @@ impl<T, A: Array<Item = Entry<T>>> LRUCache<A> {
         self.tail = new_tail;
         old_tail
     }
+}
 
-    /// Evict all elements from the cache.
-    pub fn evict_all(&mut self) {
-        self.entries.clear();
+impl<T, A> Clone for LRUCache<A>
+where
+    A: Array<Item = Entry<T>>,
+    T: Clone,
+{
+    fn clone(&self) -> Self {
+        Self {
+            entries: self.entries.clone(),
+            head: self.head,
+            tail: self.tail,
+        }
+    }
+}
+
+impl<T, A> fmt::Debug for LRUCache<A>
+where
+    A: Array<Item = Entry<T>>,
+    T: fmt::Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("LRUCache")
+            .field("head", &self.head)
+            .field("tail", &self.tail)
+            .field("entries", &self.entries)
+            .finish()
     }
 }
 
 /// Mutable iterator over values in an LRUCache, from most-recently-used to least-recently-used.
-struct LRUCacheMutIterator<'a, A: 'a + Array> {
+struct IterMut<'a, A: 'a + Array> {
     cache: &'a mut LRUCache<A>,
     pos: u16,
     done: bool,
 }
 
-impl<'a, T, A> Iterator for LRUCacheMutIterator<'a, A>
+impl<'a, T, A> Iterator for IterMut<'a, A>
 where
     T: 'a,
     A: 'a + Array<Item = Entry<T>>,
