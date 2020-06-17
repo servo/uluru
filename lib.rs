@@ -15,7 +15,8 @@ extern crate arrayvec;
 
 use arrayvec::{Array, ArrayVec};
 
-#[cfg(test)] mod tests;
+#[cfg(test)]
+mod tests;
 
 /// A LRU cache using a statically-sized array for storage.
 ///
@@ -83,12 +84,15 @@ impl<A: Array> Default for LRUCache<A> {
             head: 0,
             tail: 0,
         };
-        assert!(cache.entries.capacity() < u16::max_value() as usize, "Capacity overflow");
+        assert!(
+            cache.entries.capacity() < u16::max_value() as usize,
+            "Capacity overflow"
+        );
         cache
     }
 }
 
-impl<T, A: Array<Item=Entry<T>>> LRUCache<A> {
+impl<T, A: Array<Item = Entry<T>>> LRUCache<A> {
     /// Returns the number of elements in the cache.
     pub fn num_entries(&self) -> usize {
         self.entries.len()
@@ -126,7 +130,7 @@ impl<T, A: Array<Item=Entry<T>>> LRUCache<A> {
     /// the result on a hit.
     pub fn lookup<F, R>(&mut self, mut test_one: F) -> Option<R>
     where
-        F: FnMut(&mut T) -> Option<R>
+        F: FnMut(&mut T) -> Option<R>,
     {
         let mut result = None;
         for (i, candidate) in self.iter_mut() {
@@ -134,7 +138,7 @@ impl<T, A: Array<Item=Entry<T>>> LRUCache<A> {
                 result = Some((i, r));
                 break;
             }
-        };
+        }
 
         match result {
             None => None,
@@ -149,14 +153,14 @@ impl<T, A: Array<Item=Entry<T>>> LRUCache<A> {
     /// Touches the result on a hit.
     pub fn find<F>(&mut self, mut pred: F) -> Option<&mut T>
     where
-        F: FnMut(&T) -> bool
+        F: FnMut(&T) -> bool,
     {
         match self.iter_mut().find(|&(_, ref x)| pred(x)) {
             Some((i, _)) => {
                 self.touch(i);
                 self.front_mut()
             }
-            None => None
+            None => None,
         }
     }
 
@@ -165,7 +169,11 @@ impl<T, A: Array<Item=Entry<T>>> LRUCache<A> {
     /// This item becomes the front (most-recently-used) item in the cache.  If the cache is full,
     /// the back (least-recently-used) item will be removed.
     pub fn insert(&mut self, val: T) {
-        let entry = Entry { val, prev: 0, next: 0 };
+        let entry = Entry {
+            val,
+            prev: 0,
+            next: 0,
+        };
 
         // If the cache is full, replace the oldest entry. Otherwise, add an entry.
         let new_head = if self.entries.len() == self.entries.capacity() {
@@ -235,18 +243,19 @@ struct LRUCacheMutIterator<'a, A: 'a + Array> {
 }
 
 impl<'a, T, A> Iterator for LRUCacheMutIterator<'a, A>
-where T: 'a,
-      A: 'a + Array<Item=Entry<T>>
+where
+    T: 'a,
+    A: 'a + Array<Item = Entry<T>>,
 {
     type Item = (u16, &'a mut T);
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.done { return None }
+        if self.done {
+            return None;
+        }
 
         // Use a raw pointer because the compiler doesn't know that subsequent calls can't alias.
-        let entry = unsafe {
-            &mut *(&mut self.cache.entries[self.pos as usize] as *mut Entry<T>)
-        };
+        let entry = unsafe { &mut *(&mut self.cache.entries[self.pos as usize] as *mut Entry<T>) };
 
         let index = self.pos;
         if self.pos == self.cache.tail {
