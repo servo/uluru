@@ -94,3 +94,92 @@ fn evict_all() {
     cache.evict_all();
     assert_eq!(items(&mut cache), [], "all items evicted again");
 }
+
+#[quickcheck]
+fn touch(num: i32) {
+    let first = num;
+    let second = num + 1;
+    let third = num + 2;
+    let fourth = num + 3;
+
+    let mut cache = TestCache::default();
+
+    cache.insert(first);
+    cache.insert(second);
+    cache.insert(third);
+    cache.insert(fourth);
+
+    cache.touch(|x| *x == fourth + 1);
+
+    assert_eq!(
+        items(&mut cache),
+        [fourth, third, second, first],
+        "Nothing is touched."
+    );
+
+    cache.touch(|x| *x == second);
+
+    assert_eq!(
+        items(&mut cache),
+        [second, fourth, third, first],
+        "Touched item is moved to front."
+    );
+}
+
+#[quickcheck]
+fn find(num: i32) {
+    let first = num;
+    let second = num + 1;
+    let third = num + 2;
+    let fourth = num + 3;
+
+    let mut cache = TestCache::default();
+
+    cache.insert(first);
+    cache.insert(second);
+    cache.insert(third);
+    cache.insert(fourth);
+
+    cache.find(|x| *x == fourth + 1);
+
+    assert_eq!(
+        items(&mut cache),
+        [fourth, third, second, first],
+        "Nothing is touched."
+    );
+
+    cache.find(|x| *x == second);
+
+    assert_eq!(
+        items(&mut cache),
+        [second, fourth, third, first],
+        "Touched item is moved to front."
+    );
+}
+
+#[quickcheck]
+fn front(num: i32) {
+    let first = num;
+    let second = num + 1;
+
+    let mut cache = TestCache::default();
+
+    assert_eq!(cache.front(), None, "Nothing is in the front.");
+
+    cache.insert(first);
+    cache.insert(second);
+
+    assert_eq!(
+        cache.front(),
+        Some(&second),
+        "The last inserted item should be in the front."
+    );
+
+    cache.touch(|x| *x == first);
+
+    assert_eq!(
+        cache.front(),
+        Some(&first),
+        "Touched item should be in the front."
+    );
+}
