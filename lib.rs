@@ -3,6 +3,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
 #![no_std]
+#![deny(unsafe_code)]
 
 //! A simple, fast, least-recently-used (LRU) cache.
 //!
@@ -128,8 +129,9 @@ where
         F: FnMut(&mut T) -> Option<R>,
     {
         let mut result = None;
-        for (i, candidate) in self.iter_mut() {
-            if let Some(r) = test_one(candidate) {
+        let mut iter = self.iter_mut();
+        while let Some((i, val)) = iter.next() {
+            if let Some(r) = test_one(val) {
                 result = Some((i, r));
                 break;
             }
@@ -150,13 +152,14 @@ where
     where
         F: FnMut(&T) -> bool,
     {
-        match self.iter_mut().find(|&(_, ref x)| pred(x)) {
-            Some((i, _)) => {
+        let mut iter = self.iter_mut();
+        while let Some((i, val)) = iter.next() {
+            if pred(val) {
                 self.touch_index(i);
-                true
+                return true
             }
-            None => false,
         }
+        false
     }
 
     /// Returns the first item in the cache that matches the given predicate.
@@ -205,7 +208,6 @@ where
     fn iter_mut(&mut self) -> IterMut<A> {
         IterMut {
             pos: self.head,
-            done: self.entries.len() == 0,
             cache: self,
         }
     }
@@ -293,30 +295,21 @@ where
 struct IterMut<'a, A: 'a + Array> {
     cache: &'a mut LRUCache<A>,
     pos: u16,
-    done: bool,
 }
 
-impl<'a, T, A> Iterator for IterMut<'a, A>
+impl<'a, A, T> IterMut<'a, A>
 where
-    T: 'a,
-    A: 'a + Array<Item = Entry<T>>,
+    A: Array<Item = Entry<T>>,
 {
-    type Item = (u16, &'a mut T);
-
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.done {
-            return None;
-        }
-
-        // Use a raw pointer because the compiler doesn't know that subsequent calls can't alias.
-        let entry = unsafe { &mut *(&mut self.cache.entries[self.pos as usize] as *mut Entry<T>) };
-
+    fn next(&mut self) -> Option<(u16, &mut T)> {
         let index = self.pos;
-        if self.pos == self.cache.tail {
-            self.done = true;
-        }
-        self.pos = entry.next;
+        let entry = self.cache.entries.get_mut(index as usize)?;
 
+        self.pos = if index == self.cache.tail {
+            A::CAPACITY as u16 // Point past the end of the array to signal we are done.
+        } else {
+            entry.next
+        };
         Some((index, &mut entry.val))
     }
 }
