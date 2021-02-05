@@ -108,16 +108,25 @@ where
     A: Array<Item = Entry<T>>,
 {
     /// Returns the number of elements in the cache.
-    pub fn num_entries(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.entries.len()
     }
 
+    /// Returns the number of elements in the cache.
+    #[inline]
+    #[deprecated = "Use the 'len' method instead."]
+    pub fn num_entries(&self) -> usize {
+        self.len()
+    }
+
     /// Returns the front entry in the list (most recently used).
+    #[deprecated = "Private implementation detail. Will be removed in a future release."]
     pub fn front(&self) -> Option<&T> {
         self.entries.get(self.head as usize).map(|e| &e.val)
     }
 
     /// Returns a mutable reference to the front entry in the list (most recently used).
+    #[deprecated = "Private implementation detail. Will be removed in a future release."]
     pub fn front_mut(&mut self) -> Option<&mut T> {
         self.entries.get_mut(self.head as usize).map(|e| &mut e.val)
     }
@@ -169,6 +178,7 @@ where
         F: FnMut(&T) -> bool,
     {
         if self.touch(pred) {
+            #[allow(deprecated)]
             self.front_mut()
         } else {
             None
@@ -200,8 +210,15 @@ where
     }
 
     /// Evict all elements from the cache.
-    pub fn evict_all(&mut self) {
+    pub fn clear(&mut self) {
         self.entries.clear();
+    }
+
+    /// Evict all elements from the cache.
+    #[inline]
+    #[deprecated = "Use the 'clear' method instead."]
+    pub fn evict_all(&mut self) {
+        self.clear();
     }
 
     /// Iterate mutably over the contents of this cache.
