@@ -14,7 +14,7 @@ name = "uluru"
 path = "lib.rs"
 
 [dependencies]
-arrayvec = { version = "0.5", default-features = false } # public dependency
+arrayvec = { version = "0.6", default-features = false }
 
 [dev-dependencies]
 quickcheck = "0.9"
