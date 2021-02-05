@@ -11,7 +11,12 @@ where
     T: Clone,
     A: Array<Item = Entry<T>>,
 {
-    cache.iter_mut().map(|(_, x)| x.clone()).collect()
+    let mut v = Vec::new();
+    let mut iter = cache.iter_mut();
+    while let Some((_idx, val)) = iter.next() {
+        v.push(val.clone())
+    }
+    v
 }
 
 #[test]
