@@ -163,7 +163,6 @@ fn find(num: i32) {
 }
 
 #[quickcheck]
-#[allow(deprecated)]
 fn front(num: i32) {
     let first = num;
     let second = num + 1;
