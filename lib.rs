@@ -107,8 +107,15 @@ where
     A: Array<Item = Entry<T>>,
 {
     /// Returns the number of elements in the cache.
-    pub fn num_entries(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.entries.len()
+    }
+
+    /// Returns the number of elements in the cache.
+    #[inline]
+    #[deprecated = "Use the 'len' method instead."]
+    pub fn num_entries(&self) -> usize {
+        self.len()
     }
 
     /// Returns the front entry in the list (most recently used).
@@ -197,8 +204,15 @@ where
     }
 
     /// Evict all elements from the cache.
-    pub fn evict_all(&mut self) {
+    pub fn clear(&mut self) {
         self.entries.clear();
+    }
+
+    /// Evict all elements from the cache.
+    #[inline]
+    #[deprecated = "Use the 'clear' method instead."]
+    pub fn evict_all(&mut self) {
+        self.clear();
     }
 
     /// Iterate mutably over the contents of this cache.

@@ -17,7 +17,7 @@ where
 #[test]
 fn empty() {
     let mut cache = TestCache::default();
-    assert_eq!(cache.num_entries(), 0);
+    assert_eq!(cache.len(), 0);
     assert_eq!(items(&mut cache), []);
 }
 
@@ -25,13 +25,13 @@ fn empty() {
 fn insert() {
     let mut cache = TestCache::default();
     cache.insert(1);
-    assert_eq!(cache.num_entries(), 1);
+    assert_eq!(cache.len(), 1);
     cache.insert(2);
-    assert_eq!(cache.num_entries(), 2);
+    assert_eq!(cache.len(), 2);
     cache.insert(3);
-    assert_eq!(cache.num_entries(), 3);
+    assert_eq!(cache.len(), 3);
     cache.insert(4);
-    assert_eq!(cache.num_entries(), 4);
+    assert_eq!(cache.len(), 4);
     assert_eq!(
         items(&mut cache),
         [4, 3, 2, 1],
@@ -39,7 +39,7 @@ fn insert() {
     );
 
     cache.insert(5);
-    assert_eq!(cache.num_entries(), 4);
+    assert_eq!(cache.len(), 4);
     assert_eq!(
         items(&mut cache),
         [5, 4, 3, 2],
@@ -80,10 +80,10 @@ fn lookup() {
 }
 
 #[test]
-fn evict_all() {
+fn clear() {
     let mut cache = TestCache::default();
     cache.insert(1);
-    cache.evict_all();
+    cache.clear();
     assert_eq!(items(&mut cache), [], "all items evicted");
 
     cache.insert(1);
@@ -91,7 +91,7 @@ fn evict_all() {
     cache.insert(3);
     cache.insert(4);
     assert_eq!(items(&mut cache), [4, 3, 2, 1]);
-    cache.evict_all();
+    cache.clear();
     assert_eq!(items(&mut cache), [], "all items evicted again");
 }
 
