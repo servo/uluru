@@ -13,8 +13,11 @@ readme = "README.md"
 name = "uluru"
 path = "lib.rs"
 
-[dependencies]
-arrayvec = { version = "0.5", default-features = false } # public dependency
+[dependencies.arrayvec]
+git = "https://github.com/mbrubeck/arrayvec"
+branch = "min-const-gen"
+default-features = false
+features = ["unstable-const-generics"]
 
 [dev-dependencies]
 quickcheck = "0.9"

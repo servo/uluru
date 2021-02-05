@@ -14,7 +14,7 @@
 
 extern crate arrayvec;
 
-use arrayvec::{Array, ArrayVec};
+use arrayvec::r#const::ArrayVec;
 
 use core::fmt;
 
@@ -40,7 +40,7 @@ mod tests;
 /// # Example
 ///
 /// ```
-/// use uluru::{LRUCache, Entry};
+/// use uluru::LRUCache;
 ///
 /// struct MyValue {
 ///     id: u32,
@@ -48,7 +48,7 @@ mod tests;
 /// }
 ///
 /// // A cache with a capacity of three.
-/// type MyCache = LRUCache<[Entry<MyValue>; 3]>;
+/// type MyCache = LRUCache<MyValue, 3>;
 ///
 /// // Create an empty cache, then insert some items.
 /// let mut cache = MyCache::default();
@@ -67,11 +67,11 @@ mod tests;
 /// cache.insert(MyValue { id: 4, name: "Mars" });
 /// assert!(cache.find(|x| x.id == 2).is_none());
 /// ```
-pub struct LRUCache<A: Array> {
+pub struct LRUCache<T, const N: usize> {
     /// The most-recently-used entry is at index `head`. The entries form a linked list, linked to
     /// each other by indices within the `entries` array.  After an entry is added to the array,
     /// its index never changes, so these links are never invalidated.
-    entries: ArrayVec<A>,
+    entries: ArrayVec<Entry<T>, N>,
     /// Index of the first entry. If the cache is empty, ignore this field.
     head: u16,
     /// Index of the last entry. If the cache is empty, ignore this field.
@@ -80,7 +80,7 @@ pub struct LRUCache<A: Array> {
 
 /// An entry in an LRUCache.
 #[derive(Debug, Clone)]
-pub struct Entry<T> {
+struct Entry<T> {
     val: T,
     /// Index of the previous entry. If this entry is the head, ignore this field.
     prev: u16,
@@ -88,7 +88,7 @@ pub struct Entry<T> {
     next: u16,
 }
 
-impl<A: Array> Default for LRUCache<A> {
+impl<T, const N: usize> Default for LRUCache<T, N> {
     fn default() -> Self {
         let cache = LRUCache {
             entries: ArrayVec::new(),
@@ -103,10 +103,7 @@ impl<A: Array> Default for LRUCache<A> {
     }
 }
 
-impl<T, A> LRUCache<A>
-where
-    A: Array<Item = Entry<T>>,
-{
+impl<T, const N: usize> LRUCache<T, N> {
     /// Returns the number of elements in the cache.
     pub fn num_entries(&self) -> usize {
         self.entries.len()
@@ -205,7 +202,7 @@ where
     }
 
     /// Iterate mutably over the contents of this cache.
-    fn iter_mut(&mut self) -> IterMut<A> {
+    fn iter_mut(&mut self) -> IterMut<T, N> {
         IterMut {
             pos: self.head,
             cache: self,
@@ -263,9 +260,9 @@ where
     }
 }
 
-impl<T, A> Clone for LRUCache<A>
+/* TODO
+impl<T, const N: usize> Clone for LRUCache<T, N>
 where
-    A: Array<Item = Entry<T>>,
     T: Clone,
 {
     fn clone(&self) -> Self {
@@ -276,10 +273,11 @@ where
         }
     }
 }
+*/
 
-impl<T, A> fmt::Debug for LRUCache<A>
+/* TODO
+impl<T, const N: usize> fmt::Debug for LRUCache<T, N>
 where
-    A: Array<Item = Entry<T>>,
     T: fmt::Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -290,23 +288,21 @@ where
             .finish()
     }
 }
+*/
 
 /// Mutable iterator over values in an LRUCache, from most-recently-used to least-recently-used.
-struct IterMut<'a, A: 'a + Array> {
-    cache: &'a mut LRUCache<A>,
+struct IterMut<'a, T, const N: usize> {
+    cache: &'a mut LRUCache<T, N>,
     pos: u16,
 }
 
-impl<'a, A, T> IterMut<'a, A>
-where
-    A: Array<Item = Entry<T>>,
-{
+impl<'a, T, const N: usize> IterMut<'a, T, N> {
     fn next(&mut self) -> Option<(u16, &mut T)> {
         let index = self.pos;
         let entry = self.cache.entries.get_mut(index as usize)?;
 
         self.pos = if index == self.cache.tail {
-            A::CAPACITY as u16 // Point past the end of the array to signal we are done.
+            N as u16 // Point past the end of the array to signal we are done.
         } else {
             entry.next
         };
