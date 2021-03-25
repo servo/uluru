@@ -9,9 +9,5 @@ keywords = ["cache", "linkedlist", "array", "no_std"]
 categories = ["data-structures", "no-std"]
 readme = "README.md"
 
-[lib]
-name = "uluru"
-path = "lib.rs"
-
 [dependencies]
 arrayvec = { version = "0.6", default-features = false }
