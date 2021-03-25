@@ -99,91 +99,80 @@ fn clear() {
     assert_eq!(items(&mut cache), [], "all items evicted again");
 }
 
-#[quickcheck]
-fn touch(num: i32) {
-    let first = num;
-    let second = num + 1;
-    let third = num + 2;
-    let fourth = num + 3;
-
+#[test]
+fn touch() {
     let mut cache = TestCache::default();
 
-    cache.insert(first);
-    cache.insert(second);
-    cache.insert(third);
-    cache.insert(fourth);
+    cache.insert(0);
+    cache.insert(1);
+    cache.insert(2);
+    cache.insert(3);
 
-    cache.touch(|x| *x == fourth + 1);
+    cache.touch(|x| *x == 5);
 
     assert_eq!(
         items(&mut cache),
-        [fourth, third, second, first],
+        [3, 2, 1, 0],
         "Nothing is touched."
     );
 
-    cache.touch(|x| *x == second);
+    cache.touch(|x| *x == 1);
 
     assert_eq!(
         items(&mut cache),
-        [second, fourth, third, first],
+        [1, 3, 2, 0],
         "Touched item is moved to front."
     );
 }
 
-#[quickcheck]
-fn find(num: i32) {
-    let first = num;
-    let second = num + 1;
-    let third = num + 2;
-    let fourth = num + 3;
-
+#[test]
+fn find() {
     let mut cache = TestCache::default();
 
-    cache.insert(first);
-    cache.insert(second);
-    cache.insert(third);
-    cache.insert(fourth);
+    cache.insert(0);
+    cache.insert(1);
+    cache.insert(2);
+    cache.insert(3);
 
-    cache.find(|x| *x == fourth + 1);
+    let result = cache.find(|x| *x == 5).copied();
 
+    assert_eq!(result, None);
     assert_eq!(
         items(&mut cache),
-        [fourth, third, second, first],
+        [3, 2, 1, 0],
         "Nothing is touched."
     );
 
-    cache.find(|x| *x == second);
+    let result = cache.find(|x| *x == 1).copied();
 
+    assert_eq!(result, Some(1));
     assert_eq!(
         items(&mut cache),
-        [second, fourth, third, first],
-        "Touched item is moved to front."
+        [1, 3, 2, 0],
+        "Retrieved item is moved to front."
     );
 }
 
-#[quickcheck]
-fn front(num: i32) {
-    let first = num;
-    let second = num + 1;
-
+#[test]
+fn front() {
     let mut cache = TestCache::default();
 
     assert_eq!(cache.front(), None, "Nothing is in the front.");
 
-    cache.insert(first);
-    cache.insert(second);
+    cache.insert(0);
+    cache.insert(1);
 
     assert_eq!(
         cache.front(),
-        Some(&second),
+        Some(&1),
         "The last inserted item should be in the front."
     );
 
-    cache.touch(|x| *x == first);
+    cache.touch(|x| *x == 0);
 
     assert_eq!(
         cache.front(),
-        Some(&first),
+        Some(&0),
         "Touched item should be in the front."
     );
 }
