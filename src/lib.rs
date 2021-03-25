@@ -95,20 +95,41 @@ impl<T, const N: usize> Default for LRUCache<T, N> {
 }
 
 impl<T, const N: usize> LRUCache<T, N> {
-    /// Returns the number of elements in the cache.
-    #[inline]
-    pub fn len(&self) -> usize {
-        self.entries.len()
+    /// Insert a given key in the cache.
+    ///
+    /// This item becomes the front (most-recently-used) item in the cache.  If the cache is full,
+    /// the back (least-recently-used) item will be removed.
+    pub fn insert(&mut self, val: T) {
+        let entry = Entry {
+            val,
+            prev: 0,
+            next: 0,
+        };
+
+        // If the cache is full, replace the oldest entry. Otherwise, add an entry.
+        let new_head = if self.entries.len() == self.entries.capacity() {
+            let i = self.pop_back();
+            self.entries[i as usize] = entry;
+            i
+        } else {
+            self.entries.push(entry);
+            self.entries.len() as u16 - 1
+        };
+
+        self.push_front(new_head);
     }
 
-    /// Returns the front entry in the list (most recently used).
-    pub fn front(&self) -> Option<&T> {
-        self.entries.get(self.head as usize).map(|e| &e.val)
-    }
-
-    /// Returns a mutable reference to the front entry in the list (most recently used).
-    pub fn front_mut(&mut self) -> Option<&mut T> {
-        self.entries.get_mut(self.head as usize).map(|e| &mut e.val)
+    /// Returns the first item in the cache that matches the given predicate.
+    /// Touches the result on a hit.
+    pub fn find<F>(&mut self, pred: F) -> Option<&mut T>
+    where
+        F: FnMut(&T) -> bool,
+    {
+        if self.touch(pred) {
+            self.front_mut()
+        } else {
+            None
+        }
     }
 
     /// Performs a lookup on the cache with the given test routine. Touches
@@ -135,6 +156,28 @@ impl<T, const N: usize> LRUCache<T, N> {
         }
     }
 
+    /// Returns the number of elements in the cache.
+    #[inline]
+    pub fn len(&self) -> usize {
+        self.entries.len()
+    }
+
+    /// Evict all elements from the cache.
+    #[inline]
+    pub fn clear(&mut self) {
+        self.entries.clear();
+    }
+
+    /// Returns the front entry in the list (most recently used).
+    pub fn front(&self) -> Option<&T> {
+        self.entries.get(self.head as usize).map(|e| &e.val)
+    }
+
+    /// Returns a mutable reference to the front entry in the list (most recently used).
+    pub fn front_mut(&mut self) -> Option<&mut T> {
+        self.entries.get_mut(self.head as usize).map(|e| &mut e.val)
+    }
+
     /// Touches the first item in the cache that matches the given predicate.
     /// Returns `true` on a hit, `false` if no matches.
     pub fn touch<F>(&mut self, mut pred: F) -> bool
@@ -149,49 +192,6 @@ impl<T, const N: usize> LRUCache<T, N> {
             }
         }
         false
-    }
-
-    /// Returns the first item in the cache that matches the given predicate.
-    /// Touches the result on a hit.
-    pub fn find<F>(&mut self, pred: F) -> Option<&mut T>
-    where
-        F: FnMut(&T) -> bool,
-    {
-        if self.touch(pred) {
-            self.front_mut()
-        } else {
-            None
-        }
-    }
-
-    /// Insert a given key in the cache.
-    ///
-    /// This item becomes the front (most-recently-used) item in the cache.  If the cache is full,
-    /// the back (least-recently-used) item will be removed.
-    pub fn insert(&mut self, val: T) {
-        let entry = Entry {
-            val,
-            prev: 0,
-            next: 0,
-        };
-
-        // If the cache is full, replace the oldest entry. Otherwise, add an entry.
-        let new_head = if self.entries.len() == self.entries.capacity() {
-            let i = self.pop_back();
-            self.entries[i as usize] = entry;
-            i
-        } else {
-            self.entries.push(entry);
-            self.entries.len() as u16 - 1
-        };
-
-        self.push_front(new_head);
-    }
-
-    /// Evict all elements from the cache.
-    #[inline]
-    pub fn clear(&mut self) {
-        self.entries.clear();
     }
 
     /// Iterate mutably over the contents of this cache.
