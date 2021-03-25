@@ -15,7 +15,3 @@ path = "lib.rs"
 
 [dependencies]
 arrayvec = { version = "0.6", default-features = false }
-
-[dev-dependencies]
-quickcheck = "0.9"
-quickcheck_macros = "0.9"

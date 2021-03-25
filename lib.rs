@@ -19,13 +19,6 @@ use arrayvec::ArrayVec;
 use core::fmt;
 
 #[cfg(test)]
-extern crate quickcheck;
-
-#[cfg(test)]
-#[macro_use(quickcheck)]
-extern crate quickcheck_macros;
-
-#[cfg(test)]
 mod tests;
 
 /// A LRU cache using a statically-sized array for storage.
