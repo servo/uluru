@@ -49,12 +49,10 @@ mod tests;
 /// cache.insert(MyValue { id: 2, name: "Venus" });
 /// cache.insert(MyValue { id: 3, name: "Earth" });
 ///
-/// {
-///     // Use the `find` method to retrieve an item from the cache.
-///     // This also "touches" the item, marking it most-recently-used.
-///     let item = cache.find(|x| x.id == 1);
-///     assert_eq!(item.unwrap().name, "Mercury");
-/// }
+/// // Use the `find` method to retrieve an item from the cache.
+/// // This also "touches" the item, marking it most-recently-used.
+/// let item = cache.find(|x| x.id == 1);
+/// assert_eq!(item.unwrap().name, "Mercury");
 ///
 /// // If the cache is full, inserting a new item evicts the least-recently-used item:
 /// cache.insert(MyValue { id: 4, name: "Mars" });
