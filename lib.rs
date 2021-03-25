@@ -98,15 +98,9 @@ impl<T, const N: usize> Default for LRUCache<T, N> {
 
 impl<T, const N: usize> LRUCache<T, N> {
     /// Returns the number of elements in the cache.
+    #[inline]
     pub fn len(&self) -> usize {
         self.entries.len()
-    }
-
-    /// Returns the number of elements in the cache.
-    #[inline]
-    #[deprecated = "Use the 'len' method instead."]
-    pub fn num_entries(&self) -> usize {
-        self.len()
     }
 
     /// Returns the front entry in the list (most recently used).
@@ -197,15 +191,9 @@ impl<T, const N: usize> LRUCache<T, N> {
     }
 
     /// Evict all elements from the cache.
+    #[inline]
     pub fn clear(&mut self) {
         self.entries.clear();
-    }
-
-    /// Evict all elements from the cache.
-    #[inline]
-    #[deprecated = "Use the 'clear' method instead."]
-    pub fn evict_all(&mut self) {
-        self.clear();
     }
 
     /// Iterate mutably over the contents of this cache.
