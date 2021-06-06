@@ -178,6 +178,18 @@ impl<T, const N: usize> LRUCache<T, N> {
         self.entries.get_mut(self.head as usize).map(|e| &mut e.val)
     }
 
+    /// Returns the n-th entry in the list (most recently used).
+    pub fn get(&self, index: usize) -> Option<&T> {
+        if index >= self.len() {
+            return None;
+        }
+        let mut entry = self.entries.get(self.head as usize)?;
+        for _ in 0..index {
+            entry = self.entries.get(entry.next as usize)?;
+        }
+        Some(&entry.val)
+    }
+
     /// Touches the first item in the cache that matches the given predicate.
     /// Returns `true` on a hit, `false` if no matches.
     pub fn touch<F>(&mut self, mut pred: F) -> bool
