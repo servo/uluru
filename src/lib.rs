@@ -180,14 +180,7 @@ impl<T, const N: usize> LRUCache<T, N> {
 
     /// Returns the n-th entry in the list (most recently used).
     pub fn get(&self, index: usize) -> Option<&T> {
-        if index >= self.len() {
-            return None;
-        }
-        let mut entry = self.entries.get(self.head as usize)?;
-        for _ in 0..index {
-            entry = self.entries.get(entry.next as usize)?;
-        }
-        Some(&entry.val)
+        self.iter().nth(index)
     }
 
     /// Touches the first item in the cache that matches the given predicate.
@@ -204,6 +197,14 @@ impl<T, const N: usize> LRUCache<T, N> {
             }
         }
         false
+    }
+
+    /// Iterate mutably over the contents of this cache.
+    pub fn iter(&self) -> Iter<T, N> {
+        Iter {
+            pos: self.head,
+            cache: self,
+        }
     }
 
     /// Iterate mutably over the contents of this cache.
@@ -308,5 +309,26 @@ impl<'a, T, const N: usize> IterMut<'a, T, N> {
             entry.next
         };
         Some((index, &mut entry.val))
+    }
+}
+
+/// Iterator over values in an LRUCache, from most-recently-used to least-recently-used.
+pub struct Iter<'a, T, const N: usize> {
+    cache: &'a LRUCache<T, N>,
+    pos: u16,
+}
+
+impl<'a, T, const N: usize> Iterator for Iter<'a, T, N> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<&'a T> {
+        let entry = self.cache.entries.get(self.pos as usize)?;
+
+        self.pos = if self.pos == self.cache.tail {
+            N as u16 // Point past the end of the array to signal we are done.
+        } else {
+            entry.next
+        };
+        Some(&entry.val)
     }
 }
