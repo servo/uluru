@@ -199,7 +199,7 @@ impl<T, const N: usize> LRUCache<T, N> {
         false
     }
 
-    /// Iterate mutably over the contents of this cache.
+    /// Iterate over the contents of this cache.
     pub fn iter(&self) -> Iter<T, N> {
         Iter {
             pos: self.head,
