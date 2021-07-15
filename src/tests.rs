@@ -21,9 +21,10 @@ where
 #[test]
 fn empty() {
     let mut cache = TestCache::default();
-    assert_eq!(cache.len(), 0);
+    assert_eq!(cache.is_empty(), true);
     assert_eq!(items(&mut cache), []);
 }
+
 
 #[test]
 fn insert() {
@@ -110,11 +111,7 @@ fn touch() {
 
     cache.touch(|x| *x == 5);
 
-    assert_eq!(
-        items(&mut cache),
-        [3, 2, 1, 0],
-        "Nothing is touched."
-    );
+    assert_eq!(items(&mut cache), [3, 2, 1, 0], "Nothing is touched.");
 
     cache.touch(|x| *x == 1);
 
@@ -137,11 +134,7 @@ fn find() {
     let result = cache.find(|x| *x == 5).copied();
 
     assert_eq!(result, None);
-    assert_eq!(
-        items(&mut cache),
-        [3, 2, 1, 0],
-        "Nothing is touched."
-    );
+    assert_eq!(items(&mut cache), [3, 2, 1, 0], "Nothing is touched.");
 
     let result = cache.find(|x| *x == 1).copied();
 
@@ -176,7 +169,6 @@ fn front() {
         "Touched item should be in the front."
     );
 }
-
 
 #[test]
 fn get() {
