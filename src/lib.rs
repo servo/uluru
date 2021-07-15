@@ -69,7 +69,7 @@ pub struct LRUCache<T, const N: usize> {
     tail: u16,
 }
 
-/// An entry in an LRUCache.
+/// An entry in an `LRUCache`.
 #[derive(Debug, Clone)]
 struct Entry<T> {
     val: T,
@@ -162,6 +162,12 @@ impl<T, const N: usize> LRUCache<T, N> {
         self.entries.len()
     }
 
+    /// Returns whether the entries `ArrayVec` is empty.
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.entries.is_empty()
+    }
+
     /// Evict all elements from the cache.
     #[inline]
     pub fn clear(&mut self) {
@@ -193,7 +199,7 @@ impl<T, const N: usize> LRUCache<T, N> {
         while let Some((i, val)) = iter.next() {
             if pred(val) {
                 self.touch_index(i);
-                return true
+                return true;
             }
         }
         false
@@ -292,7 +298,7 @@ where
     }
 }
 
-/// Mutable iterator over values in an LRUCache, from most-recently-used to least-recently-used.
+/// Mutable iterator over values in an `LRUCache`, from most-recently-used to least-recently-used.
 struct IterMut<'a, T, const N: usize> {
     cache: &'a mut LRUCache<T, N>,
     pos: u16,
@@ -312,7 +318,7 @@ impl<'a, T, const N: usize> IterMut<'a, T, N> {
     }
 }
 
-/// Iterator over values in an LRUCache, from most-recently-used to least-recently-used.
+/// Iterator over values in an `LRUCache`, from most-recently-used to least-recently-used.
 pub struct Iter<'a, T, const N: usize> {
     cache: &'a LRUCache<T, N>,
     pos: u16,
