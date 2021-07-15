@@ -25,6 +25,13 @@ fn empty() {
     assert_eq!(items(&mut cache), []);
 }
 
+#[test]
+fn len() {
+    let mut cache = TestCache::default();
+    cache.insert(1);
+    assert_eq!(cache.len(), 1);
+    assert_eq!(items(&mut cache), [1]);
+}
 
 #[test]
 fn insert() {
