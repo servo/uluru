@@ -12,10 +12,7 @@
 //!
 //! See the [`LRUCache`](LRUCache) docs for details.
 
-extern crate arrayvec;
-
 use arrayvec::ArrayVec;
-
 use core::fmt;
 
 #[cfg(test)]
@@ -206,7 +203,7 @@ impl<T, const N: usize> LRUCache<T, N> {
     }
 
     /// Iterate over the contents of this cache.
-    pub fn iter(&self) -> Iter<T, N> {
+    pub fn iter(&self) -> Iter<'_, T, N> {
         Iter {
             pos: self.head,
             cache: self,
@@ -214,7 +211,7 @@ impl<T, const N: usize> LRUCache<T, N> {
     }
 
     /// Iterate mutably over the contents of this cache.
-    fn iter_mut(&mut self) -> IterMut<T, N> {
+    fn iter_mut(&mut self) -> IterMut<'_, T, N> {
         IterMut {
             pos: self.head,
             cache: self,
