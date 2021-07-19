@@ -1,6 +1,6 @@
 [package]
 name = "uluru"
-version = "2.1.1"
+version = "2.2.0"
 authors = ["The Servo Project Developers", "Matt Brubeck <mbrubeck@limpet.net>"]
 license = "MPL-2.0"
 edition = "2018"
