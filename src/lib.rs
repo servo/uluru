@@ -7,7 +7,7 @@
 
 //! A simple, fast, least-recently-used (LRU) cache.
 //!
-//! `LRUCache` uses a fixed-capacity array for storage. It provides `O(1)` insertion, and `O(n)`
+//! [`LRUCache`] uses a fixed-capacity array for storage. It provides `O(1)` insertion, and `O(n)`
 //! lookup.  It does not require an allocator and can be used in `no_std` crates.
 //!
 //! See the [`LRUCache`](LRUCache) docs for details.
@@ -162,7 +162,7 @@ impl<T, const N: usize> LRUCache<T, N> {
         self.entries.len()
     }
 
-    /// Returns whether the entries `ArrayVec` is empty.
+    /// Returns true if the cache is empty.
     #[inline]
     pub fn is_empty(&self) -> bool {
         self.entries.is_empty()
@@ -318,7 +318,7 @@ impl<'a, T, const N: usize> IterMut<'a, T, N> {
     }
 }
 
-/// Iterator over values in an `LRUCache`, from most-recently-used to least-recently-used.
+/// Iterator over values in an [`LRUCache`], from most-recently-used to least-recently-used.
 pub struct Iter<'a, T, const N: usize> {
     cache: &'a LRUCache<T, N>,
     pos: u16,
