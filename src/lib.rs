@@ -117,7 +117,7 @@ impl<T, const N: usize> LRUCache<T, N> {
     }
 
     /// Returns the first item in the cache that matches the given predicate.
-    /// Touches the result on a hit.
+    /// Touches the result (makes it most-recently-used) on a hit.
     pub fn find<F>(&mut self, pred: F) -> Option<&mut T>
     where
         F: FnMut(&T) -> bool,
@@ -186,7 +186,8 @@ impl<T, const N: usize> LRUCache<T, N> {
         self.iter().nth(index)
     }
 
-    /// Touches the first item in the cache that matches the given predicate.
+    /// Touches the first item in the cache that matches the given predicate (marks it as
+    /// most-recently-used).
     /// Returns `true` on a hit, `false` if no matches.
     pub fn touch<F>(&mut self, mut pred: F) -> bool
     where
