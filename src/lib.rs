@@ -203,7 +203,8 @@ impl<T, const N: usize> LRUCache<T, N> {
         false
     }
 
-    /// Iterate over the contents of this cache.
+    /// Iterate over the contents of this cache in order from most-recently-used to
+    /// least-recently-used.
     pub fn iter(&self) -> Iter<'_, T, N> {
         Iter {
             pos: self.head,
@@ -211,7 +212,8 @@ impl<T, const N: usize> LRUCache<T, N> {
         }
     }
 
-    /// Iterate mutably over the contents of this cache.
+    /// Iterate mutably over the contents of this cache in order from most-recently-used to
+    /// least-recently-used.
     fn iter_mut(&mut self) -> IterMut<'_, T, N> {
         IterMut {
             pos: self.head,
