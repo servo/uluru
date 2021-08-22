@@ -11,9 +11,5 @@ categories = ["data-structures", "no-std"]
 readme = "README.md"
 include = ["src/**/*", "LICENSE", "README.md"]
 
-[features]
-default = []
-std = []
-
 [dependencies]
 arrayvec = { version = "0.7", default-features = false }
