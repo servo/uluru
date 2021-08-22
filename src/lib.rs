@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-#![no_std]
+#![cfg_attr(not(feature = "std"), no_std)]
 #![deny(unsafe_code)]
 
 //! A simple, fast, least-recently-used (LRU) cache.
@@ -96,6 +96,33 @@ impl<T, const N: usize> LRUCache<T, N> {
     ///
     /// This item becomes the front (most-recently-used) item in the cache.  If the cache is full,
     /// the back (least-recently-used) item will be removed.
+    #[cfg(feature = "std")]
+    pub fn insert(&mut self, val: T) -> Option<T> {
+        let entry = Entry {
+            val,
+            prev: 0,
+            next: 0,
+        };
+
+        // If the cache is full, replace the oldest entry. Otherwise, add an entry.
+        let (new_head, previous_entry) = if self.entries.len() == self.entries.capacity() {
+            let i = self.pop_back();
+            let previous_entry = std::mem::replace(&mut self.entries[i as usize], entry);
+            (i, Some(previous_entry.val))
+        } else {
+            self.entries.push(entry);
+            (self.entries.len() as u16 - 1, None)
+        };
+
+        self.push_front(new_head);
+        previous_entry
+    }
+
+    /// Insert a given key in the cache.
+    ///
+    /// This item becomes the front (most-recently-used) item in the cache.  If the cache is full,
+    /// the back (least-recently-used) item will be removed.
+    #[cfg(not(feature = "std"))]
     pub fn insert(&mut self, val: T) {
         let entry = Entry {
             val,
