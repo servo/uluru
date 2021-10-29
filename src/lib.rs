@@ -156,13 +156,13 @@ impl<T, const N: usize> LRUCache<T, N> {
 
     /// Returns the number of elements in the cache.
     #[inline]
-    pub fn len(&self) -> usize {
+    pub const fn len(&self) -> usize {
         self.entries.len()
     }
 
     /// Returns true if the cache is empty.
     #[inline]
-    pub fn is_empty(&self) -> bool {
+    pub const fn is_empty(&self) -> bool {
         self.entries.is_empty()
     }
 
@@ -206,7 +206,7 @@ impl<T, const N: usize> LRUCache<T, N> {
 
     /// Iterate over the contents of this cache in order from most-recently-used to
     /// least-recently-used.
-    pub fn iter(&self) -> Iter<'_, T, N> {
+    pub const fn iter(&self) -> Iter<'_, T, N> {
         Iter {
             pos: self.head,
             cache: self,
