@@ -12,4 +12,4 @@ readme = "README.md"
 include = ["src/**/*", "LICENSE", "README.md"]
 
 [dependencies]
-arrayvec = { version = "0.7", default-features = false }
+heapless = "0.8"

@@ -12,7 +12,7 @@
 //!
 //! See the [`LRUCache`](LRUCache) docs for details.
 
-use arrayvec::ArrayVec;
+use heapless::Vec;
 use core::{fmt, mem::replace};
 
 #[cfg(test)]
@@ -59,7 +59,7 @@ pub struct LRUCache<T, const N: usize> {
     /// The most-recently-used entry is at index `head`. The entries form a linked list, linked to
     /// each other by indices within the `entries` array.  After an entry is added to the array,
     /// its index never changes, so these links are never invalidated.
-    entries: ArrayVec<Entry<T>, N>,
+    entries: Vec<Entry<T>, N>,
     /// Index of the first entry. If the cache is empty, ignore this field.
     head: u16,
     /// Index of the last entry. If the cache is empty, ignore this field.
@@ -79,7 +79,7 @@ struct Entry<T> {
 impl<T, const N: usize> Default for LRUCache<T, N> {
     fn default() -> Self {
         let cache = LRUCache {
-            entries: ArrayVec::new(),
+            entries: Vec::new(),
             head: 0,
             tail: 0,
         };
@@ -109,7 +109,7 @@ impl<T, const N: usize> LRUCache<T, N> {
             let previous_entry = replace(&mut self.entries[i as usize], entry);
             (i, Some(previous_entry.val))
         } else {
-            self.entries.push(entry);
+            self.entries.push(entry).ok();
             (self.entries.len() as u16 - 1, None)
         };
 
