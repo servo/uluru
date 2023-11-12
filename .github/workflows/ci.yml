@@ -1,0 +1,29 @@
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+
+name: CI
+
+jobs:
+  ci-linux:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        rust: [stable, nightly]
+        target: [x86_64-unknown-linux-gnu]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ matrix.rust }}
+          override: true
+      - name: Install Rust target
+        run: rustup target install --toolchain=${{ matrix.rust }} ${{ matrix.target }}
+
+      - name: Check code
+        run: cargo check --target ${{ matrix.target }} --all-features
+
+      - name: Test
+        run: cargo test --target ${{ matrix.target }} --all --all-features
