@@ -3,7 +3,7 @@ on:
   # Only run when merging to master, or open/synchronize/reopen a PR.
   push:
     branches:
-      - master
+      - main
   pull_request:
 
 jobs:
