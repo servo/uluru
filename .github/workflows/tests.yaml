@@ -1,6 +1,6 @@
 name: CI Tests
 on:
-  # Only run when merging to master, or open/synchronize/reopen a PR.
+  # Only run when merging to main, or open/synchronize/reopen a PR.
   push:
     branches:
       - main
