@@ -140,7 +140,7 @@ impl<T, const N: usize> LRUCache<T, N> {
         while let Some((i, val)) = iter.next() {
             if let Some(r) = pred(val) {
                 self.touch_index(i);
-                return Some(r)
+                return Some(r);
             }
         }
         None
