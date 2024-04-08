@@ -90,10 +90,7 @@ impl<T, const N: usize> LRUCache<T, N> {
             head: 0,
             tail: 0,
         };
-        assert!(
-            N < u16::max_value() as usize,
-            "Capacity overflow"
-        );
+        assert!(N < u16::max_value() as usize, "Capacity overflow");
         cache
     }
 
@@ -102,24 +99,24 @@ impl<T, const N: usize> LRUCache<T, N> {
     /// This item becomes the front (most-recently-used) item in the cache.  If the cache is full,
     /// the back (least-recently-used) item will be removed and returned.
     pub fn insert(&mut self, val: T) -> Option<T> {
-        let entry = Entry {
+        let new_entry = Entry {
             val,
             prev: 0,
             next: 0,
         };
 
         // If the cache is full, replace the oldest entry. Otherwise, add an entry.
-        let (new_head, previous_entry) = if self.entries.len() == self.entries.capacity() {
+        if self.entries.is_full() {
             let i = self.pop_back();
-            let previous_entry = replace(&mut self.entries[i as usize], entry);
-            (i, Some(previous_entry.val))
+            let old_entry = replace(self.entry(i), new_entry);
+            self.push_front(i);
+            Some(old_entry.val)
         } else {
-            self.entries.push(entry);
-            (self.entries.len() as u16 - 1, None)
-        };
-
-        self.push_front(new_head);
-        previous_entry
+            let i = self.entries.len() as u16;
+            self.entries.push(new_entry);
+            self.push_front(i);
+            None
+        }
     }
 
     /// Returns the first item in the cache that matches the given predicate.
@@ -221,30 +218,35 @@ impl<T, const N: usize> LRUCache<T, N> {
 
     /// Touch a given entry, putting it first in the list.
     #[inline]
-    fn touch_index(&mut self, idx: u16) {
-        if idx != self.head {
-            self.remove(idx);
-            self.push_front(idx);
+    fn touch_index(&mut self, i: u16) {
+        if i != self.head {
+            self.remove(i);
+            self.push_front(i);
         }
+    }
+
+    #[inline(always)]
+    fn entry(&mut self, i: u16) -> &mut Entry<T> {
+        &mut self.entries[i as usize]
     }
 
     /// Remove an entry from the linked list.
     ///
     /// Note: This only unlinks the entry from the list; it does not remove it from the array.
     fn remove(&mut self, i: u16) {
-        let prev = self.entries[i as usize].prev;
-        let next = self.entries[i as usize].next;
+        let prev = self.entry(i).prev;
+        let next = self.entry(i).next;
 
         if i == self.head {
             self.head = next;
         } else {
-            self.entries[prev as usize].next = next;
+            self.entry(prev).next = next;
         }
 
         if i == self.tail {
             self.tail = prev;
         } else {
-            self.entries[next as usize].prev = prev;
+            self.entry(next).prev = prev;
         }
     }
 
@@ -253,8 +255,8 @@ impl<T, const N: usize> LRUCache<T, N> {
         if self.entries.len() == 1 {
             self.tail = i;
         } else {
-            self.entries[i as usize].next = self.head;
-            self.entries[self.head as usize].prev = i;
+            self.entry(i).next = self.head;
+            self.entry(self.head).prev = i;
         }
         self.head = i;
     }
@@ -263,10 +265,8 @@ impl<T, const N: usize> LRUCache<T, N> {
     ///
     /// Note: This only unlinks the entry from the list; it does not remove it from the array.
     fn pop_back(&mut self) -> u16 {
-        let old_tail = self.tail;
-        let new_tail = self.entries[old_tail as usize].prev;
-        self.tail = new_tail;
-        old_tail
+        let new_tail = self.entry(self.tail).prev;
+        replace(&mut self.tail, new_tail)
     }
 }
 
