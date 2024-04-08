@@ -78,20 +78,25 @@ struct Entry<T> {
 
 impl<T, const N: usize> Default for LRUCache<T, N> {
     fn default() -> Self {
-        let cache = LRUCache {
-            entries: ArrayVec::new(),
-            head: 0,
-            tail: 0,
-        };
-        assert!(
-            cache.entries.capacity() < u16::max_value() as usize,
-            "Capacity overflow"
-        );
-        cache
+        Self::new()
     }
 }
 
 impl<T, const N: usize> LRUCache<T, N> {
+    /// Create an empty cache.
+    pub const fn new() -> Self {
+        let cache = LRUCache {
+            entries: ArrayVec::new_const(),
+            head: 0,
+            tail: 0,
+        };
+        assert!(
+            N < u16::max_value() as usize,
+            "Capacity overflow"
+        );
+        cache
+    }
+
     /// Insert a given key in the cache.
     ///
     /// This item becomes the front (most-recently-used) item in the cache.  If the cache is full,

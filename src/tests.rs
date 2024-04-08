@@ -20,7 +20,7 @@ where
 
 #[test]
 fn empty() {
-    let mut cache = TestCache::default();
+    let mut cache = TestCache::new();
     assert_eq!(cache.is_empty(), true);
     assert_eq!(items(&mut cache), []);
     cache.insert(1);
