@@ -86,13 +86,12 @@ impl<T, const N: usize> Default for LRUCache<T, N> {
 impl<T, const N: usize> LRUCache<T, N> {
     /// Create an empty cache.
     pub const fn new() -> Self {
-        let cache = LRUCache {
+        assert!(N < u16::MAX as usize, "Capacity overflow");
+        LRUCache {
             entries: ArrayVec::new_const(),
             head: 0,
             tail: 0,
-        };
-        assert!(N < u16::max_value() as usize, "Capacity overflow");
-        cache
+        }
     }
 
     /// Insert a given key in the cache.
