@@ -132,26 +132,18 @@ impl<T, const N: usize> LRUCache<T, N> {
 
     /// Performs a lookup on the cache with the given test routine. Touches
     /// the result on a hit.
-    pub fn lookup<F, R>(&mut self, mut test_one: F) -> Option<R>
+    pub fn lookup<F, R>(&mut self, mut pred: F) -> Option<R>
     where
         F: FnMut(&mut T) -> Option<R>,
     {
-        let mut result = None;
         let mut iter = self.iter_mut();
         while let Some((i, val)) = iter.next() {
-            if let Some(r) = test_one(val) {
-                result = Some((i, r));
-                break;
-            }
-        }
-
-        match result {
-            None => None,
-            Some((i, r)) => {
+            if let Some(r) = pred(val) {
                 self.touch_index(i);
-                Some(r)
+                return Some(r)
             }
         }
+        None
     }
 
     /// Returns the number of elements in the cache.
