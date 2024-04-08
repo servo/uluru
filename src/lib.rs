@@ -10,10 +10,10 @@
 //! [`LRUCache`] uses a fixed-capacity array for storage. It provides `O(1)` insertion, and `O(n)`
 //! lookup.  It does not require an allocator and can be used in `no_std` crates.
 //!
-//! See the [`LRUCache`](LRUCache) docs for details.
+//! See the [`LRUCache`] docs for details.
 
 use arrayvec::ArrayVec;
-use core::{fmt, mem::replace};
+use core::mem::replace;
 
 #[cfg(test)]
 mod tests;
@@ -55,6 +55,7 @@ mod tests;
 /// cache.insert(MyValue { id: 4, name: "Mars" });
 /// assert!(cache.find(|x| x.id == 2).is_none());
 /// ```
+#[derive(Debug, Clone)]
 pub struct LRUCache<T, const N: usize> {
     /// The most-recently-used entry is at index `head`. The entries form a linked list, linked to
     /// each other by indices within the `entries` array.  After an entry is added to the array,
@@ -267,32 +268,6 @@ impl<T, const N: usize> LRUCache<T, N> {
     fn pop_back(&mut self) -> u16 {
         let new_tail = self.entry(self.tail).prev;
         replace(&mut self.tail, new_tail)
-    }
-}
-
-impl<T, const N: usize> Clone for LRUCache<T, N>
-where
-    T: Clone,
-{
-    fn clone(&self) -> Self {
-        Self {
-            entries: self.entries.clone(),
-            head: self.head,
-            tail: self.tail,
-        }
-    }
-}
-
-impl<T, const N: usize> fmt::Debug for LRUCache<T, N>
-where
-    T: fmt::Debug,
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("LRUCache")
-            .field("head", &self.head)
-            .field("tail", &self.tail)
-            .field("entries", &self.entries)
-            .finish()
     }
 }
 
