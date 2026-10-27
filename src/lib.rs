@@ -85,8 +85,13 @@ impl<T, const N: usize> Default for LRUCache<T, N> {
 
 impl<T, const N: usize> LRUCache<T, N> {
     /// Create an empty cache.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the capacity `N` is zero or `u16::MAX` or larger.
     pub const fn new() -> Self {
         assert!(N < u16::MAX as usize, "Capacity overflow");
+        assert!(N > 0, "Capacity must be at least 1");
         LRUCache {
             entries: ArrayVec::new_const(),
             head: 0,
